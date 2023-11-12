@@ -1,7 +1,10 @@
+import operator
 import random
 import time
 
 import config
+from collections import deque
+from queue import PriorityQueue
 
 
 class Algorithm:
@@ -56,24 +59,32 @@ class ExampleAlgorithm(Algorithm):
         return solution_actions
 
 
-# initial_state represents starting vector of linearized matrix
-# goal_state is a vector which represents a solution to the game
-# algorithm ends when these to vector are identical
-class BFS(Algorithm):
-    def __init__(self, heuristic=None):
-        super().__init__(heuristic)
-        self.visited = []
-        self.queue = []
+class Node:
 
+    def __init__(self, state, actions):
+        self.state = state
+        self.actions = actions
+
+    def get_state(self):
+        return self.state
+
+    def get_actions(self):
+        return self.actions
+
+
+class BFS(Algorithm):
     def get_steps(self, initial_state, goal_state):
 
+        queue = deque()
+        visited = []
         solution_actions = []
-        self.queue.insert(0, (initial_state, solution_actions))
+        node = Node(initial_state, solution_actions)
+        queue.appendleft(node)
 
-        while self.queue:
-            popped = self.queue.pop(0)
-            popped_state = popped[0]
-            popped_actions = popped[1]
+        while queue:
+            popped = queue.popleft()
+            popped_state = popped.get_state()
+            popped_actions = popped.get_actions()
 
             legal_actions = self.get_legal_actions(popped_state)
             for legal_action in legal_actions:
@@ -83,14 +94,46 @@ class BFS(Algorithm):
                     popped_actions.append(legal_action)
                     return popped_actions
 
-                if new_state in self.visited:
+                if new_state in visited:
                     pass
                 else:
-                    self.visited.append(new_state)
+                    visited.append(new_state)
                     updated_actions = popped_actions.copy()  # Due to python's mechanics this can not be simple
                     # assignment, we want a deep not a shallow copy
                     updated_actions.append(legal_action)
-                    self.queue.insert(0,
-                                      (new_state, updated_actions))  # object may be named queue but it's just an array
+                    new_node = Node(new_state, updated_actions)
+                    queue.append(new_node)
 
-        return solution_actions
+
+# class BestFirstSearch(Algorithm):
+#     def __init__(self, heuristic=None):
+#         super().__init__(heuristic)
+#         self.queue = []
+#         self.visited = []
+#         self.node = {}
+#
+#     def get_steps(self, initial_state, goal_state):
+#
+#         solution_actions = []
+#         self.queue.insert(0, Node(initial_state, solution_actions))
+#
+#         while self.queue:
+#             popped = self.queue.pop(0)
+#             popped_state = popped.get_state()
+#             popped_actions = popped.get_actions()
+#
+#             legal_actions = self.get_legal_actions(popped_state)
+#             for legal_action in legal_actions:
+#                 new_state = self.apply_action(popped_state, legal_action)
+#
+#                 if new_state == goal_state:
+#                     popped_actions.append(legal_action)
+#                     return popped_actions
+#
+#                 if new_state in self.visited:
+#                     pass
+#                 else:
+#                     self.visited.append(new_state)
+#                     updated_actions = popped_actions.copy()
+#                     updated_actions.append(legal_action)
+#                     self.queue.insert(0, Node(new_state, updated_actions))
