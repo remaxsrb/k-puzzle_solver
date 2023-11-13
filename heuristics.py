@@ -34,15 +34,14 @@ class Manhattan(Heuristic):
             final_state.append(i)
         final_state.append(0)
 
-        for tile in state:
-            if tile != 0:
-                goal_index = final_state.index(tile)
-                current_index = state.index(tile)
+        for piece in state:
+            goal_index = final_state.index(piece)
+            current_index = state.index(piece)
 
-                goal_position = divmod(goal_index, size)
-                current_position = divmod(current_index, size)
+            goal_position = divmod(goal_index, size)
+            current_position = divmod(current_index, size)
 
-                manhattan_distance += (abs(current_position[0] - goal_position[0])
-                                       + abs(current_position[1] - goal_position[1]))
+            manhattan_distance += (abs(current_position[0] - goal_position[0])
+                                   + abs(current_position[1] - goal_position[1]))
 
         return manhattan_distance
