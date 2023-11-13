@@ -1,4 +1,3 @@
-import operator
 import random
 import time
 
@@ -60,10 +59,11 @@ class ExampleAlgorithm(Algorithm):
 
 
 class Node:
-
-    def __init__(self, state, actions):
+    def __init__(self, state, actions, path_length=0, parent_node=None):
         self.state = state
         self.actions = actions
+        self.path_length = path_length
+        self.parent_node = parent_node
 
     def get_state(self):
         return self.state
@@ -71,12 +71,21 @@ class Node:
     def get_actions(self):
         return self.actions
 
+    def get_path_length(self):
+        return self.path_length
+
+    def get_parent_node(self):
+        return self.parent_node
+
+    def __lt__(self, other):
+        return self.state < other.state
+
 
 class BFS(Algorithm):
     def get_steps(self, initial_state, goal_state):
 
         queue = deque()
-        visited = []
+        visited = set()
         solution_actions = []
         node = Node(initial_state, solution_actions)
         queue.appendleft(node)
@@ -97,7 +106,7 @@ class BFS(Algorithm):
                 if new_state in visited:
                     pass
                 else:
-                    visited.append(new_state)
+                    visited.add(new_state)
                     updated_actions = popped_actions.copy()  # Due to python's mechanics this can not be simple
                     # assignment, we want a deep not a shallow copy
                     updated_actions.append(legal_action)
@@ -105,35 +114,37 @@ class BFS(Algorithm):
                     queue.append(new_node)
 
 
-# class BestFirstSearch(Algorithm):
-#     def __init__(self, heuristic=None):
-#         super().__init__(heuristic)
-#         self.queue = []
-#         self.visited = []
-#         self.node = {}
-#
-#     def get_steps(self, initial_state, goal_state):
-#
-#         solution_actions = []
-#         self.queue.insert(0, Node(initial_state, solution_actions))
-#
-#         while self.queue:
-#             popped = self.queue.pop(0)
-#             popped_state = popped.get_state()
-#             popped_actions = popped.get_actions()
-#
-#             legal_actions = self.get_legal_actions(popped_state)
-#             for legal_action in legal_actions:
-#                 new_state = self.apply_action(popped_state, legal_action)
-#
-#                 if new_state == goal_state:
-#                     popped_actions.append(legal_action)
-#                     return popped_actions
-#
-#                 if new_state in self.visited:
-#                     pass
-#                 else:
-#                     self.visited.append(new_state)
-#                     updated_actions = popped_actions.copy()
-#                     updated_actions.append(legal_action)
-#                     self.queue.insert(0, Node(new_state, updated_actions))
+class BestFirstSearch(Algorithm):
+    def get_steps(self, initial_state, goal_state):
+
+        queue = PriorityQueue()
+        visited = set()
+        solution_actions = []
+        node = Node(initial_state, solution_actions)
+        queue.put((self.heuristic.get_evaluation(initial_state), node))
+        while queue:
+            popped = queue.get()
+            popped_node = popped[1]
+
+            popped_state = popped_node.get_state()
+            popped_actions = popped_node.get_actions()
+
+            legal_actions = self.get_legal_actions(popped_state)
+            for legal_action in legal_actions:
+                new_state = self.apply_action(popped_state, legal_action)
+
+                if new_state == goal_state:
+                    popped_actions.append(legal_action)
+                    return popped_actions
+
+                if new_state in visited:
+                    pass
+                else:
+                    visited.add(new_state)
+                    updated_actions = popped_actions.copy()
+                    updated_actions.append(legal_action)
+                    new_node = Node(new_state, updated_actions)
+                    queue.put((self.heuristic.get_evaluation(new_state), new_node))
+
+
+

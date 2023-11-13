@@ -11,13 +11,18 @@ class ExampleHeuristic(Heuristic):
 class Hamming(Heuristic):
     def get_evaluation(self, state):
         hamming = 0
-        final_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
-        for i in 8:
-            if state[i] == final_state[i]:
+        final_state = []
+        for i in range(1, len(state)):
+            final_state.append(i)
+        final_state.append(0)
+        final_state = tuple(final_state)
+
+        for i in range(len(state)):
+            if state.index(i) != final_state.index(i):
                 hamming = hamming + 1
+        return hamming
 
 
 class Manhattan(Heuristic):
     def get_evaluation(self, state):
         manhattan = 0
-        final_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
