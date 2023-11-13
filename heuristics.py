@@ -25,4 +25,24 @@ class Hamming(Heuristic):
 
 class Manhattan(Heuristic):
     def get_evaluation(self, state):
-        manhattan = 0
+        state = list(state)
+        size = int(len(state) / 2)
+        final_state = []
+        manhattan_distance = 0
+
+        for i in range(1, len(state)):
+            final_state.append(i)
+        final_state.append(0)
+
+        for tile in state:
+            if tile != 0:
+                goal_index = final_state.index(tile)
+                current_index = state.index(tile)
+
+                goal_position = divmod(goal_index, size)
+                current_position = divmod(current_index, size)
+
+                manhattan_distance += (abs(current_position[0] - goal_position[0])
+                                       + abs(current_position[1] - goal_position[1]))
+
+        return manhattan_distance
